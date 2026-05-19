@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <!-- White background circle -->
+  <circle cx="250" cy="250" r="248" fill="white"/>
+
+  <!-- Outer blue ring -->
+  <circle cx="250" cy="250" r="248" fill="none" stroke="#29ABE2" stroke-width="18"/>
+
+  <!-- Inner white ring -->
+  <circle cx="250" cy="250" r="228" fill="none" stroke="white" stroke-width="10"/>
+
+  <!-- Blue filled inner circle -->
+  <circle cx="250" cy="250" r="218" fill="#29ABE2"/>
+
+  <!-- Inner white ring separator -->
+  <circle cx="250" cy="250" r="218" fill="none" stroke="white" stroke-width="6"/>
+
+  <!-- "BIODOCTOR" curved text at top in red -->
+  <defs>
+    <path id="topCurve" d="M 52,250 A 198,198 0 0,1 448,250"/>
+    <path id="bottomCurve" d="M 68,250 A 182,182 0 0,0 432,250"/>
+  </defs>
+
+  <text font-family="Arial Black, Arial, sans-serif" font-size="58" font-weight="900" fill="#CC0000" letter-spacing="6">
+    <textPath href="#topCurve" startOffset="50%" text-anchor="middle">BIODOCTOR</textPath>
+  </text>
+
+  <!-- "A Sewer Solution That Stands The Test of Time" curved text at bottom in red -->
+  <text font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#CC0000" letter-spacing="1">
+    <textPath href="#bottomCurve" startOffset="50%" text-anchor="middle">A Sewer Solution That Stands The Test of Time</textPath>
+  </text>
+
+  <!-- Two blue decorative dots on sides -->
+  <circle cx="42" cy="250" r="14" fill="#29ABE2"/>
+  <circle cx="458" cy="250" r="14" fill="#29ABE2"/>
+
+  <!-- Large white "B" letterform -->
+  <!-- D shape (right half circle) -->
+  <path d="M 210,130 L 210,370 L 268,370 C 340,370 390,330 390,278 C 390,248 374,224 348,210 C 366,196 378,174 378,150 C 378,108 336,130 268,130 Z
+            M 248,148 L 268,148 C 310,148 340,160 340,178 C 340,196 318,210 280,210 L 248,210 Z
+            M 248,228 L 286,228 C 332,228 352,244 352,270 C 352,296 328,312 286,312 L 248,312 Z"
+        fill="white"/>
+  <!-- White border/outline effect for B -->
+  <path d="M 210,130 L 210,370 L 268,370 C 340,370 390,330 390,278 C 390,248 374,224 348,210 C 366,196 378,174 378,150 C 378,108 336,130 268,130 Z
+            M 248,148 L 268,148 C 310,148 340,160 340,178 C 340,196 318,210 280,210 L 248,210 Z
+            M 248,228 L 286,228 C 332,228 352,244 352,270 C 352,296 328,312 286,312 L 248,312 Z"
+        fill="none" stroke="white" stroke-width="4"/>
+
+  <!-- "D" curved arc (the distinctive D overlay) -->
+  <path d="M 220,150 C 220,150 300,148 340,180 C 380,210 388,250 380,285 C 368,330 310,360 230,362"
+        fill="none" stroke="white" stroke-width="22" stroke-linecap="round"/>
+</svg>
