@@ -399,7 +399,7 @@ function UserManagementPage() {
   const toggleUser = async (target: ManagedUser) => {
     setError("");
     try {
-      const res = await fetch(`/api/auth/users/${target.id}`, {
+      const res = await fetch(apiUrl(`/api/auth/users/${target.id}`), {
         method: "PATCH",
         headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ active: !target.active }),

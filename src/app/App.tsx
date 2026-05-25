@@ -58,7 +58,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (token: string, user
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch(mode === "setup" ? "/api/auth/setup" : "/api/auth/login", {
+      const res = await fetch(apiUrl(mode === "setup" ? "/api/auth/setup" : "/api/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(mode === "setup" ? { name, email, password } : { email, password }),
