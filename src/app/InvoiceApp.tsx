@@ -297,9 +297,9 @@ export default function InvoiceApp() {
                 </label>
                 {emailStatus === "ok" && <div style={{ padding: 14, borderRadius: 14, background: "#ecfdf5", color: "#166534", fontWeight: 700 }}>Invoice sent successfully.</div>}
                 {emailStatus === "err" && <div style={{ padding: 14, borderRadius: 14, background: "#fee2e2", color: "#991b1b", fontWeight: 700 }}>Error: {emailError}</div>}
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-                  <button type="button" onClick={() => setEmailOpen(false)} style={{ padding: "12px 18px", borderRadius: 14, border: `1px solid ${BRAND.border}`, background: BRAND.light, color: BRAND.text, cursor: "pointer" }}>Cancel</button>
-                  <button type="button" onClick={handleSendEmail} disabled={emailSending || !emailTo.trim()} style={{ padding: "12px 18px", borderRadius: 14, border: "none", background: BRAND.accent, color: "#fff", fontWeight: 700, cursor: emailSending || !emailTo.trim() ? "not-allowed" : "pointer", opacity: emailSending || !emailTo.trim() ? 0.65 : 1 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, flexWrap: "wrap" }}>
+                  <button type="button" onClick={() => setEmailOpen(false)} style={{ padding: "12px 18px", borderRadius: 14, border: `1px solid ${BRAND.border}`, background: BRAND.light, color: BRAND.text, cursor: "pointer", width: isMobile ? "100%" : undefined }}>Cancel</button>
+                  <button type="button" onClick={handleSendEmail} disabled={emailSending || !emailTo.trim()} style={{ padding: "12px 18px", borderRadius: 14, border: "none", background: BRAND.accent, color: "#fff", fontWeight: 700, cursor: emailSending || !emailTo.trim() ? "not-allowed" : "pointer", opacity: emailSending || !emailTo.trim() ? 0.65 : 1, width: isMobile ? "100%" : undefined }}>
                     {emailSending ? "Sending…" : "Send email"}
                   </button>
                 </div>
@@ -311,27 +311,27 @@ export default function InvoiceApp() {
         {showPreview ? (
           <div style={{ display: "grid", gap: 18 }}>
             <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap", background: "#fff", border: `1px solid ${BRAND.border}`, borderRadius: 8, padding: "14px 16px", boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)", position: "sticky", top: 0, zIndex: 20 }}>
-              <h1 style={{ margin: 0, fontSize: 26, fontWeight: 600, color: BRAND.text }}>Invoice Generator</h1>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <button type="button" onClick={handleEdit} style={{ ...previewActionStyles, background: "#1d4ed8" }}>
+              <h1 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 600, color: BRAND.text }}>Invoice Generator</h1>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", width: isMobile ? "100%" : "auto" }}>
+                <button type="button" onClick={handleEdit} style={{ ...previewActionStyles, background: "#1d4ed8", width: isMobile ? "100%" : undefined, justifyContent: "center" }}>
                   <FileEdit size={18} />
                   Edit Invoice
                 </button>
-                <button type="button" onClick={handlePrint} style={{ ...previewActionStyles, background: "#c90808" }}>
+                <button type="button" onClick={handlePrint} style={{ ...previewActionStyles, background: "#c90808", width: isMobile ? "100%" : undefined, justifyContent: "center" }}>
                   <Printer size={18} />
                   Print Invoice
                 </button>
-                <button type="button" onClick={handleOpenEmail} style={{ ...previewActionStyles, background: "#16a34a" }}>
+                <button type="button" onClick={handleOpenEmail} style={{ ...previewActionStyles, background: "#16a34a", width: isMobile ? "100%" : undefined, justifyContent: "center" }}>
                   <Mail size={18} />
                   Send Email
                 </button>
               </div>
             </div>
 
-            <div ref={previewRef} style={{ maxWidth: 790, width: "100%", margin: "0 auto", background: "#fff", boxShadow: "0 8px 22px rgba(15, 23, 42, 0.12)", padding: isMobile ? 24 : 28 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 18 }}>
+            <div ref={previewRef} style={{ maxWidth: 790, width: "100%", margin: "0 auto", background: "#fff", boxShadow: "0 8px 22px rgba(15, 23, 42, 0.12)", padding: isMobile ? 20 : 28, overflowWrap: "anywhere" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 18, flexDirection: isMobile ? "column" : "row" }}>
                 <img src="/biodoctor-logo.png" alt="Biodoctor logo" style={{ width: 92, height: 92, borderRadius: "50%", objectFit: "cover" }} />
-                <div style={{ textAlign: "right", fontSize: 12, lineHeight: 1.45, color: BRAND.text }}>
+                <div style={{ textAlign: isMobile ? "left" : "right", fontSize: 12, lineHeight: 1.45, color: BRAND.text }}>
                   <div style={{ fontWeight: 700 }}>Biodoctor Solutions</div>
                   <div>Kasarani Biashara Centre,</div>
                   <div>2nd Floor, Room C2</div>
@@ -511,7 +511,7 @@ export default function InvoiceApp() {
                     <input value={item.desc} onChange={(e) => updateItem(item.id, "desc", e.target.value)} placeholder="Item description" style={{ ...formFieldStyles, borderRadius: 2, background: "#fff", padding: "9px 10px", fontSize: 12 }} />
                     <input type="number" value={item.qty} min={0} onChange={(e) => updateItem(item.id, "qty", e.target.value)} style={{ ...formFieldStyles, borderRadius: 2, background: "#fff", padding: "9px 10px", fontSize: 12 }} />
                     <input type="number" value={item.rate || ""} min={0} step={0.01} onChange={(e) => updateItem(item.id, "rate", e.target.value)} style={{ ...formFieldStyles, borderRadius: 2, background: "#fff", padding: "9px 10px", fontSize: 12 }} />
-                    <div style={{ ...formFieldStyles, borderRadius: 2, background: "#fff", padding: "9px 10px", fontSize: 12, textAlign: "right" }}>{formatKES(item.total)}</div>
+                    <div style={{ ...formFieldStyles, borderRadius: 2, background: "#fff", padding: "9px 10px", fontSize: 12, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis" }}>{formatKES(item.total)}</div>
                     {items.length > 1 && (
                       <button type="button" onClick={() => removeItem(item.id)} style={{ border: `1px solid ${BRAND.border}`, background: "#fff", color: "#b91c1c", borderRadius: 3, padding: "8px 10px", cursor: "pointer", fontWeight: 700 }}>Remove</button>
                     )}
@@ -570,7 +570,7 @@ export default function InvoiceApp() {
               </div>
             </section>
 
-            <div style={{ marginTop: 22, display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ marginTop: 22, display: "flex", justifyContent: isMobile ? "stretch" : "flex-end" }}>
               <button
                 type="button"
                 onClick={handleGenerate}
@@ -584,6 +584,7 @@ export default function InvoiceApp() {
                   fontWeight: 700,
                   padding: "13px 22px",
                   minWidth: 160,
+                  width: isMobile ? "100%" : undefined,
                 }}
               >
                 Generate Invoice

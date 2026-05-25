@@ -15,7 +15,20 @@ const palette = {
   red: "#dc2626",
 };
 
+function useIsNarrow(bp = 760) {
+  const [narrow, setNarrow] = useState(() => (typeof window !== "undefined" ? window.innerWidth < bp : true));
+
+  useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth < bp);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [bp]);
+
+  return narrow;
+}
+
 function AuthScreen({ onAuthenticated }: { onAuthenticated: (token: string, user: AuthUser) => void }) {
+  const isNarrow = useIsNarrow();
   const [mode, setMode] = useState<"login" | "setup">("login");
   const [checking, setChecking] = useState(true);
   const [name, setName] = useState("");
@@ -61,8 +74,8 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (token: string, user
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "radial-gradient(circle at top, rgba(59,130,246,0.16), transparent 30%), linear-gradient(180deg, #f8fbff 0%, #eef7ff 100%)", display: "grid", placeItems: "center", padding: 20, color: palette.text, fontFamily: "Inter, system-ui, sans-serif" }}>
-      <div style={{ width: "min(980px, 100%)", display: "grid", gap: 24 }}>
+    <div style={{ minHeight: "100vh", background: "radial-gradient(circle at top, rgba(59,130,246,0.16), transparent 30%), linear-gradient(180deg, #f8fbff 0%, #eef7ff 100%)", display: "grid", placeItems: "center", padding: isNarrow ? 14 : 20, color: palette.text, fontFamily: "Inter, system-ui, sans-serif" }}>
+      <div style={{ width: "min(980px, 100%)", display: "grid", gap: isNarrow ? 16 : 24 }}>
         <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
           <div style={{ width: 58, height: 58, borderRadius: 18, background: palette.blue, color: "#fff", display: "grid", placeItems: "center", fontSize: 28, fontWeight: 900, boxShadow: "0 18px 40px rgba(59, 130, 246, 0.28)" }}>B</div>
           <div>
@@ -73,8 +86,8 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (token: string, user
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: 520, overflow: "hidden", borderRadius: 30, background: "#fff", boxShadow: "0 28px 90px rgba(15, 23, 42, 0.12)" }}>
-          <div style={{ background: `linear-gradient(180deg, ${palette.blue}, #1e3a8a)`, color: "#fff", padding: 40, display: "grid", gap: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isNarrow ? "1fr" : "1fr 1fr", minHeight: isNarrow ? "auto" : 520, overflow: "hidden", borderRadius: isNarrow ? 20 : 30, background: "#fff", boxShadow: "0 28px 90px rgba(15, 23, 42, 0.12)" }}>
+          <div style={{ background: `linear-gradient(180deg, ${palette.blue}, #1e3a8a)`, color: "#fff", padding: isNarrow ? 24 : 40, display: "grid", gap: isNarrow ? 18 : 24 }}>
             <div style={{ display: "grid", gap: 10 }}>
               <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.05 }}>Secure access for your practice</div>
               <div style={{ color: "rgba(255,255,255,0.87)", fontSize: 15, lineHeight: 1.8 }}>
@@ -101,7 +114,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (token: string, user
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} style={{ padding: 40, display: "grid", gap: 20, background: palette.card }}>
+          <form onSubmit={handleSubmit} style={{ padding: isNarrow ? 24 : 40, display: "grid", gap: 20, background: palette.card }}>
             <div style={{ display: "grid", gap: 8 }}>
               <div style={{ fontSize: 22, fontWeight: 800 }}>{mode === "setup" ? "Create administrator" : "Welcome back"}</div>
               <div style={{ color: palette.muted, fontSize: 14 }}>

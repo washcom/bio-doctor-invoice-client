@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileEdit, Mail, Printer } from "lucide-react";
 import { QuotationForm } from "./components/QuotationForm";
 import { QuotationPreview } from "./components/QuotationPreview";
@@ -23,7 +23,20 @@ const BRAND = {
   text: "#0f172a",
 };
 
+function useIsNarrow(bp = 760) {
+  const [narrow, setNarrow] = useState(() => (typeof window !== "undefined" ? window.innerWidth < bp : true));
+
+  useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth < bp);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [bp]);
+
+  return narrow;
+}
+
 export default function QuotationApp() {
+  const isNarrow = useIsNarrow();
   const [quotationData, setQuotationData] = useState<QuotationData | null>(null);
   const [showForm, setShowForm] = useState(true);
   const [emailSending, setEmailSending] = useState(false);
@@ -125,15 +138,15 @@ export default function QuotationApp() {
 
   return (
     <div style={{ minHeight: "100vh", background: BRAND.page, color: BRAND.text }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 20px 40px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isNarrow ? "16px 14px 28px" : "24px 20px 40px" }}>
         {quotationData && !showForm && (
           <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap", background: BRAND.card, border: `1px solid ${BRAND.border}`, borderRadius: 8, padding: "14px 16px", boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)", position: "sticky", top: 0, zIndex: 20, marginBottom: 18 }}>
-            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 600, color: BRAND.text }}>Quotation Generator</h1>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <h1 style={{ margin: 0, fontSize: isNarrow ? 22 : 26, fontWeight: 600, color: BRAND.text }}>Quotation Generator</h1>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", width: isNarrow ? "100%" : "auto" }}>
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
-                style={{ ...actionStyles, background: "#1d4ed8" }}
+                style={{ ...actionStyles, background: "#1d4ed8", width: isNarrow ? "100%" : undefined, justifyContent: "center" }}
               >
                 <FileEdit size={18} />
                 Edit Quotation
@@ -141,7 +154,7 @@ export default function QuotationApp() {
               <button
                 type="button"
                 onClick={handlePrint}
-                style={{ ...actionStyles, background: "#c90808" }}
+                style={{ ...actionStyles, background: "#c90808", width: isNarrow ? "100%" : undefined, justifyContent: "center" }}
               >
                 <Printer size={18} />
                 Print Quotation
@@ -153,6 +166,8 @@ export default function QuotationApp() {
                 style={{
                   ...actionStyles,
                   background: "#16a34a",
+                  width: isNarrow ? "100%" : undefined,
+                  justifyContent: "center",
                   cursor: emailSending || !quotationData.clientEmail.trim() ? "not-allowed" : "pointer",
                   opacity: emailSending || !quotationData.clientEmail.trim() ? 0.65 : 1,
                 }}

@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 
 export interface QuotationItem {
   description: string;
@@ -25,8 +25,22 @@ interface QuotationPreviewProps {
   data: QuotationData;
 }
 
+function useIsNarrow(bp = 760) {
+  const [narrow, setNarrow] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < bp : true));
+
+  useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth < bp);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [bp]);
+
+  return narrow;
+}
+
 export const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps>(
   ({ data }, ref) => {
+    const isNarrow = useIsNarrow();
+
     const calculateSubtotal = () => {
       return data.items.reduce((sum, item) => sum + item.qty * item.rate, 0);
     };
@@ -44,10 +58,10 @@ export const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps
     };
 
     return (
-      <div ref={ref} style={{ maxWidth: 790, width: '100%', margin: '0 auto', background: '#fff', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.12)', padding: 28, color: '#0f172a' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 18 }}>
+      <div ref={ref} style={{ maxWidth: 790, width: '100%', margin: '0 auto', background: '#fff', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.12)', padding: isNarrow ? 20 : 28, color: '#0f172a', overflowWrap: 'anywhere' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 18, flexDirection: isNarrow ? 'column' : 'row' }}>
           <img src="/biodoctor-logo.png" alt="Biodoctor logo" style={{ width: 92, height: 92, borderRadius: '50%', objectFit: 'cover' }} />
-          <div style={{ textAlign: 'right', fontSize: 12, lineHeight: 1.45, color: '#0f172a' }}>
+          <div style={{ textAlign: isNarrow ? 'left' : 'right', fontSize: 12, lineHeight: 1.45, color: '#0f172a' }}>
             <div style={{ fontWeight: 700 }}>Biodoctor Solutions</div>
             <div>Kasarani Biashara Centre,</div>
             <div>2nd Floor, Room C2</div>
@@ -66,7 +80,7 @@ export const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps
 
         <h2 style={{ margin: '0 0 24px', fontSize: 26, fontWeight: 500, color: '#0f172a', letterSpacing: 0 }}>QUOTATION</h2>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 22, fontSize: 12, color: '#0f172a' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 1fr', gap: isNarrow ? 12 : 24, marginBottom: 22, fontSize: 12, color: '#0f172a' }}>
           <div>
             <div><strong>Name:</strong> {data.clientName}</div>
             <div><strong>Phone:</strong> {data.clientPhone}</div>
@@ -131,7 +145,7 @@ export const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps
           </div>
         )}
 
-        <div style={{ borderTop: '1px solid #cfe6ff', borderBottom: '1px solid #cfe6ff', marginTop: 28, padding: '16px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, fontSize: 12, color: '#0f172a' }}>
+        <div style={{ borderTop: '1px solid #cfe6ff', borderBottom: '1px solid #cfe6ff', marginTop: 28, padding: '16px 0', display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 1fr', gap: isNarrow ? 12 : 24, fontSize: 12, color: '#0f172a' }}>
           <div style={{ display: 'grid', gap: 12 }}>
             <img src="/biodoctor-logo.png" alt="Biodoctor signature stamp" style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', marginTop: 4 }} />
           </div>
@@ -143,7 +157,7 @@ export const QuotationPreview = forwardRef<HTMLDivElement, QuotationPreviewProps
 
         <div style={{ paddingTop: 16, fontSize: 12, color: '#0f172a' }}>
           <strong>Account Details:</strong>
-          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 18 }}>
+          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: isNarrow ? '1fr' : '1fr 1fr 1fr', gap: 18 }}>
             <div><strong>Bank Name:</strong> {data.bankName}</div>
             <div><strong>Account Name:</strong> {data.accountName}</div>
             <div><strong>Account Number:</strong> {data.accountNumber}</div>

@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { FileText, LayoutDashboard, LifeBuoy, LogOut, Menu, ReceiptText, Users, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import InvoiceApp from "./InvoiceApp";
 import QuotationApp from "./QuotationApp";
 import { authHeaders, type AuthUser } from "./auth";
@@ -29,15 +31,15 @@ const palette = {
 type NavItem = {
   key: "dashboard" | "invoice" | "quotation" | "users";
   label: string;
-  icon: string;
+  icon: LucideIcon;
   adminOnly?: boolean;
 };
 
 const navItems: NavItem[] = [
-  { key: "dashboard", label: "Dashboard", icon: "🏠" },
-  { key: "invoice", label: "Invoice", icon: "🧾" },
-  { key: "quotation", label: "Quotation", icon: "📄" },
-  { key: "users", label: "Users", icon: "👤", adminOnly: true },
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "invoice", label: "Invoice", icon: ReceiptText },
+  { key: "quotation", label: "Quotation", icon: FileText },
+  { key: "users", label: "Users", icon: Users, adminOnly: true },
 ];
 
 type DashboardStat = {
@@ -87,6 +89,12 @@ const defaultDashboardData: DashboardData = {
   quotationRecords: [],
 };
 
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "BD";
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
+}
+
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div
@@ -121,6 +129,18 @@ function StatusPill({ status }: { status: string }) {
       {status}
     </span>
   );
+}
+
+function useIsNarrow(bp = 900) {
+  const [narrow, setNarrow] = useState(() => (typeof window !== "undefined" ? window.innerWidth < bp : true));
+
+  useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth < bp);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [bp]);
+
+  return narrow;
 }
 
 const tableHeaderStyle: React.CSSProperties = {
@@ -240,22 +260,24 @@ function RecordsPage({
   onAdd: () => void;
 }) {
   const [selectedRecord, setSelectedRecord] = useState<RecentDocument | null>(null);
+  const isNarrow = useIsNarrow();
 
   return (
-    <div style={{ padding: "28px 32px 40px" }}>
+    <div style={{ padding: isNarrow ? "20px 14px 28px" : "28px 32px 40px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 20, marginBottom: 22, flexWrap: "wrap" }}>
         <div>
-          <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>{title}</div>
+          <div style={{ fontSize: isNarrow ? 24 : 28, fontWeight: 800, marginBottom: 6 }}>{title}</div>
           <div style={{ color: palette.gray600, fontSize: 14 }}>{subtitle}</div>
           {error && <div style={{ color: palette.red, fontSize: 13, fontWeight: 700, marginTop: 10 }}>{error}</div>}
         </div>
-        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", width: isNarrow ? "100%" : "auto" }}>
           <input
             value={search}
             onChange={(event) => onSearch(event.target.value)}
             placeholder="Search records or clients..."
             style={{
-              minWidth: 260,
+              minWidth: isNarrow ? 0 : 260,
+              width: isNarrow ? "100%" : undefined,
               borderRadius: 14,
               border: `1px solid ${palette.gray100}`,
               padding: "12px 16px",
@@ -269,6 +291,7 @@ function RecordsPage({
             type="button"
             onClick={onAdd}
             style={{
+              width: isNarrow ? "100%" : undefined,
               border: "none",
               borderRadius: 14,
               padding: "12px 18px",
@@ -283,7 +306,7 @@ function RecordsPage({
         </div>
       </div>
 
-      <Card style={{ padding: 24 }}>
+      <Card style={{ padding: isNarrow ? 14 : 24 }}>
         <RecordsTable records={records} emptyText="No records found." loading={loading} onView={setSelectedRecord} maxHeight="calc(100vh - 230px)" />
       </Card>
 
@@ -320,6 +343,7 @@ function RecordsPage({
 }
 
 function UserManagementPage() {
+  const isNarrow = useIsNarrow();
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -389,15 +413,15 @@ function UserManagementPage() {
   };
 
   return (
-    <div style={{ padding: "28px 32px 40px" }}>
+    <div style={{ padding: isNarrow ? "20px 14px 28px" : "28px 32px 40px" }}>
       <div style={{ marginBottom: 22 }}>
-        <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>User management</div>
+        <div style={{ fontSize: isNarrow ? 24 : 28, fontWeight: 800, marginBottom: 6 }}>User management</div>
         <div style={{ color: palette.gray600, fontSize: 14 }}>Create users, assign roles, and disable access when needed.</div>
         {error && <div style={{ color: palette.red, fontSize: 13, fontWeight: 800, marginTop: 10 }}>{error}</div>}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 20, alignItems: "start" }}>
-        <Card style={{ padding: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isNarrow ? "1fr" : "360px 1fr", gap: 20, alignItems: "start" }}>
+        <Card style={{ padding: isNarrow ? 16 : 24 }}>
           <form onSubmit={createUser} style={{ display: "grid", gap: 14 }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: palette.gray900 }}>Add user</div>
             <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Full name" style={inputStyle} />
@@ -413,7 +437,7 @@ function UserManagementPage() {
           </form>
         </Card>
 
-        <Card style={{ padding: 24 }}>
+        <Card style={{ padding: isNarrow ? 14 : 24 }}>
           <RecordsTable
             records={users.map((user) => ({
               id: user.name,
@@ -431,8 +455,8 @@ function UserManagementPage() {
           {!loading && users.length > 0 && (
             <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
               {users.map((user) => (
-                <div key={user.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 14, background: palette.gray50 }}>
-                  <span style={{ fontSize: 13, color: palette.gray700 }}>{user.email}</span>
+                <div key={user.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 14, background: palette.gray50, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 13, color: palette.gray700, minWidth: 0, overflowWrap: "anywhere" }}>{user.email}</span>
                   <button type="button" onClick={() => toggleUser(user)} style={{ border: "none", borderRadius: 10, padding: "8px 12px", background: user.active ? palette.redSoft : palette.blueSoft, color: user.active ? palette.red : palette.blue, fontWeight: 800, cursor: "pointer" }}>
                     {user.active ? "Disable" : "Enable"}
                   </button>
@@ -458,6 +482,8 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
+  const isNarrow = useIsNarrow();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeNav, setActiveNav] = useState("dashboard");
   const [search, setSearch] = useState("");
   const [recordSearch, setRecordSearch] = useState("");
@@ -627,100 +653,249 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
     );
   }, [quotationRecords, recordSearch]);
 
+  useEffect(() => {
+    if (!isNarrow) setSidebarOpen(false);
+  }, [isNarrow]);
+
   return (
     <div style={{ minHeight: "100vh", background: palette.bg, color: palette.gray900, fontFamily: "Inter, system-ui, sans-serif" }}>
-      <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div style={{ display: "flex", flexDirection: isNarrow ? "column" : "row", minHeight: "100vh" }}>
+        {isNarrow && (
+          <header
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 25,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              padding: "12px 14px",
+              background: "rgba(255, 255, 255, 0.96)",
+              borderBottom: `1px solid ${palette.gray100}`,
+              boxShadow: "0 10px 28px rgba(15, 23, 42, 0.08)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 13, background: palette.blue, color: "#fff", display: "grid", placeItems: "center", fontWeight: 900, flexShrink: 0 }}>
+                BD
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 16, fontWeight: 900, color: palette.gray900, lineHeight: 1.1 }}>BioDoctor</div>
+                <div style={{ fontSize: 12, color: palette.gray500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Invoice workspace</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open sidebar"
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 14,
+                border: `1px solid ${palette.gray100}`,
+                background: palette.blueSoft,
+                color: palette.blue,
+                display: "grid",
+                placeItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <Menu size={21} strokeWidth={2.5} />
+            </button>
+          </header>
+        )}
+
+        {isNarrow && sidebarOpen && (
+          <button
+            type="button"
+            aria-label="Close sidebar"
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 40,
+              border: "none",
+              background: "rgba(15, 23, 42, 0.42)",
+              cursor: "pointer",
+            }}
+          />
+        )}
+
         <aside
           style={{
-            width: 260,
+            width: isNarrow ? "min(320px, calc(100vw - 44px))" : 280,
             flexShrink: 0,
-            position: "sticky",
+            position: isNarrow ? "fixed" : "sticky",
             top: 0,
+            left: 0,
+            bottom: isNarrow ? 0 : undefined,
             height: "100vh",
             overflowY: "auto",
             background: palette.paper,
             borderRight: `1px solid ${palette.gray100}`,
-            boxShadow: "8px 0 24px rgba(15, 23, 42, 0.05)",
+            boxShadow: isNarrow ? "22px 0 50px rgba(15, 23, 42, 0.18)" : "10px 0 30px rgba(15, 23, 42, 0.06)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            padding: "32px 20px",
+            padding: isNarrow ? "18px 16px" : "24px 18px",
+            zIndex: isNarrow ? 50 : 30,
+            transform: isNarrow && !sidebarOpen ? "translateX(-105%)" : "translateX(0)",
+            transition: "transform 180ms ease",
           }}
         >
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}>
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 12,
-                  background: palette.blue,
-                  color: "#fff",
-                  display: "grid",
-                  placeItems: "center",
-                  fontWeight: 800,
-                }}
-              >
-                i
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: isNarrow ? 12 : 28 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                <div
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 14,
+                    background: palette.blue,
+                    color: "#fff",
+                    display: "grid",
+                    placeItems: "center",
+                    fontWeight: 900,
+                    boxShadow: "0 14px 28px rgba(29, 78, 216, 0.22)",
+                    flexShrink: 0,
+                  }}
+                >
+                  BD
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 900, fontSize: 18, color: palette.gray900, lineHeight: 1.1 }}>BioDoctor</div>
+                  <div style={{ fontSize: 12, color: palette.gray500, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Invoice workspace</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 18, color: palette.gray900 }}>BioDoctor</div>
-                <div style={{ fontSize: 12, color: palette.gray500 }}>BioDoctor Dashboard</div>
-              </div>
+              {isNarrow && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Close sidebar"
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 14,
+                    border: `1px solid ${palette.gray100}`,
+                    background: palette.gray50,
+                    color: palette.gray700,
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                >
+                  <X size={19} strokeWidth={2.5} />
+                </button>
+              )}
             </div>
-            <nav style={{ display: "grid", gap: 6 }}>
+
+            <nav
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: 7,
+              }}
+            >
               {navItems.filter((item) => !item.adminOnly || user.role === "admin").map((item) => {
                 const isActive =
                   activeNav === item.key ||
                   activeNav === `${item.key}-records` ||
                   activeNav === `${item.key}-create`;
+                const Icon = item.icon;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={item.key}
                     onClick={() => {
                       setRecordSearch("");
                       setActiveNav(item.key === "dashboard" || item.key === "users" ? item.key : `${item.key}-records`);
+                      if (isNarrow) setSidebarOpen(false);
                     }}
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 10,
-                      padding: "14px 16px",
-                      borderRadius: 18,
+                      justifyContent: "flex-start",
+                      gap: 12,
+                      width: "100%",
+                      border: `1px solid ${isActive ? palette.gray100 : "transparent"}`,
+                      padding: "13px 14px",
+                      borderRadius: 14,
                       background: isActive ? palette.blueSoft : "transparent",
                       color: isActive ? palette.blue : palette.gray700,
-                      fontWeight: 600,
+                      fontWeight: 800,
                       cursor: "pointer",
+                      boxShadow: isActive ? "inset 3px 0 0 #1d4ed8" : "none",
+                      fontSize: 14,
+                      fontFamily: "inherit",
                     }}
                   >
-                    <span>{item.icon}</span>
-                    <span>{item.label}</span>
-                  </div>
+                    <span
+                      style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 10,
+                        display: "grid",
+                        placeItems: "center",
+                        background: isActive ? "#fff" : palette.gray50,
+                        color: isActive ? palette.blue : palette.gray600,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Icon size={17} strokeWidth={2.4} />
+                    </span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+                  </button>
                 );
               })}
             </nav>
           </div>
 
-          <div style={{ display: "grid", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 18, background: palette.blueSoft }}>
-              <span>👤</span>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginTop: isNarrow ? 18 : 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 14px", borderRadius: 16, background: palette.gray50, border: `1px solid ${palette.gray100}`, minWidth: 0 }}>
+              <span style={{ width: 34, height: 34, borderRadius: 12, display: "grid", placeItems: "center", background: palette.blue, color: "#fff", fontSize: 12, fontWeight: 900, flexShrink: 0 }}>
+                {getInitials(user.name)}
+              </span>
               <span style={{ minWidth: 0 }}>
                 <span style={{ display: "block", fontSize: 14, fontWeight: 800, color: palette.gray900, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</span>
-                <span style={{ display: "block", fontSize: 12, color: palette.gray600 }}>{user.role}</span>
+                <span style={{ display: "block", fontSize: 12, color: palette.gray600, textTransform: "capitalize" }}>{user.role}</span>
               </span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 18, background: palette.gray50 }}>
-              <span>💬</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: palette.gray700 }}>Support</span>
+            <div style={{ display: isNarrow ? "none" : "flex", alignItems: "center", gap: 12, padding: "13px 14px", borderRadius: 16, background: palette.gray50, border: `1px solid ${palette.gray100}` }}>
+              <span style={{ width: 34, height: 34, borderRadius: 12, display: "grid", placeItems: "center", background: "#fff", color: palette.gray600, flexShrink: 0 }}>
+                <LifeBuoy size={17} strokeWidth={2.4} />
+              </span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: palette.gray700 }}>Support</span>
             </div>
-            <div onClick={onLogout} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 18, background: palette.gray50, cursor: "pointer" }}>
-              <span>🚪</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: palette.gray700 }}>Logout</span>
-            </div>
+            <button
+              type="button"
+              onClick={onLogout}
+              aria-label="Logout"
+              title="Logout"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: 12,
+                padding: "13px 14px",
+                borderRadius: 16,
+                border: `1px solid ${palette.gray100}`,
+                background: palette.paper,
+                color: palette.red,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                fontWeight: 800,
+              }}
+            >
+              <LogOut size={17} strokeWidth={2.4} />
+              <span style={{ fontSize: 14 }}>Logout</span>
+            </button>
           </div>
         </aside>
 
-        <main style={{ flex: 1, height: "100vh", padding: activeNav === "dashboard" ? "28px 32px 40px" : 0, overflow: "auto" }}>
+        <main style={{ flex: 1, height: isNarrow ? "auto" : "100vh", padding: activeNav === "dashboard" ? (isNarrow ? "20px 14px 28px" : "28px 32px 40px") : 0, overflow: "auto", minWidth: 0 }}>
           {activeNav === "invoice-create" ? (
             <InvoiceApp />
           ) : activeNav === "quotation-create" ? (
@@ -755,17 +930,18 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
             <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 20, marginBottom: 28, flexWrap: "wrap" }}>
             <div>
-              <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 6 }}>Invoice dashboard</div>
+              <div style={{ fontSize: isNarrow ? 24 : 28, fontWeight: 800, marginBottom: 6 }}>Invoice dashboard</div>
               <div style={{ color: palette.gray600, fontSize: 14 }}>Monitor invoices, payments, and cash flow from one place.</div>
               {dashboardError && <div style={{ color: palette.red, fontSize: 13, fontWeight: 700, marginTop: 10 }}>Dashboard stats unavailable: {dashboardError}</div>}
             </div>
-            <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", width: isNarrow ? "100%" : "auto" }}>
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search records or clients..."
                 style={{
-                  minWidth: 220,
+                  minWidth: isNarrow ? 0 : 220,
+                  width: isNarrow ? "100%" : undefined,
                   borderRadius: 16,
                   border: `1px solid ${palette.gray200}`,
                   padding: "14px 18px",
@@ -779,6 +955,7 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
                 type="button"
                 onClick={() => setActiveNav("invoice-create")}
                 style={{
+                  width: isNarrow ? "100%" : undefined,
                   border: "none",
                   borderRadius: 14,
                   padding: "12px 18px",
@@ -794,6 +971,7 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
                 type="button"
                 onClick={() => setActiveNav("quotation-create")}
                 style={{
+                  width: isNarrow ? "100%" : undefined,
                   border: `1px solid ${palette.gray200}`,
                   borderRadius: 14,
                   padding: "12px 18px",
@@ -805,11 +983,11 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
               >
                 Create Quotation
               </button>
-              <div style={{ width: 44, height: 44, borderRadius: 16, background: palette.blue, display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, fontSize: 14 }}>MH</div>
+              {!isNarrow && <div style={{ width: 44, height: 44, borderRadius: 16, background: palette.blue, display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, fontSize: 14 }}>MH</div>}
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 20, marginBottom: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isNarrow ? "1fr" : "repeat(3, minmax(0, 1fr))", gap: 20, marginBottom: 28 }}>
             {dashboardData.stats.map((item) => (
               <Card
                 key={item.label}
@@ -838,8 +1016,8 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
             ))}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 20, marginBottom: 28 }}>
-            <Card style={{ padding: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isNarrow ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: 20, marginBottom: 28 }}>
+            <Card style={{ padding: isNarrow ? 14 : 24 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: palette.gray900 }}>Invoice records</div>
@@ -851,7 +1029,7 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
               <RecordsTable records={filteredInvoices} emptyText="No invoice records saved yet." maxHeight={300} />
             </Card>
 
-            <Card style={{ padding: 24 }}>
+            <Card style={{ padding: isNarrow ? 14 : 24 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: palette.gray900 }}>Quotation records</div>

@@ -81,7 +81,7 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5 rounded-lg border border-[#cfe6ff] bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5 rounded-lg border border-[#cfe6ff] bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] sm:p-5">
       {/* Client Information */}
       <div>
         <h2 className="mb-3 text-base font-semibold text-slate-900">Client Information</h2>
@@ -147,12 +147,12 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
 
       {/* Items */}
       <div>
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
           <h2 className="text-base font-semibold text-slate-900">Items</h2>
           <button
             type="button"
             onClick={() => append({ description: '', qty: 1, rate: 0 })}
-            className="flex items-center gap-2 rounded-sm bg-blue-700 px-4 py-2 text-xs font-bold text-white hover:bg-blue-800"
+            className="flex items-center justify-center gap-2 rounded-sm bg-blue-700 px-4 py-2 text-xs font-bold text-white hover:bg-blue-800"
           >
             <Plus size={16} />
             Add Item
@@ -188,7 +188,7 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
                   placeholder="Rate (KES)"
                 />
               </div>
-              <div className="rounded-sm border border-[#cfe6ff] bg-white px-3 py-2 text-right text-xs text-slate-900">
+              <div className="min-w-0 overflow-hidden text-ellipsis rounded-sm border border-[#cfe6ff] bg-white px-3 py-2 text-right text-xs text-slate-900">
                 KES {((watchItems[index]?.qty || 0) * (watchItems[index]?.rate || 0)).toLocaleString('en-KE', { minimumFractionDigits: 2 })}
               </div>
               {fields.length > 1 && (
@@ -206,7 +206,7 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
 
         <div className="mt-4 space-y-2 border-t border-[#cfe6ff] pt-4">
           {/* VAT Checkbox */}
-          <div className="flex justify-end">
+          <div className="flex justify-start sm:justify-end">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -218,27 +218,27 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
           </div>
 
           {/* Subtotal */}
-          <div className="flex justify-end items-center gap-4">
+          <div className="flex items-center justify-between gap-4 sm:justify-end">
             <span className="text-xs font-bold text-slate-900">Subtotal:</span>
-            <span className="text-xs text-slate-900">
+            <span className="text-right text-xs text-slate-900">
               KES {calculateSubtotal().toLocaleString('en-KE', { minimumFractionDigits: 2 })}
             </span>
           </div>
 
           {/* VAT Amount */}
           {watchIncludeVAT && (
-            <div className="flex justify-end items-center gap-4">
+            <div className="flex items-center justify-between gap-4 sm:justify-end">
               <span className="text-xs font-bold text-slate-900">VAT (16%):</span>
-              <span className="text-xs text-slate-900">
+              <span className="text-right text-xs text-slate-900">
                 KES {calculateVAT().toLocaleString('en-KE', { minimumFractionDigits: 2 })}
               </span>
             </div>
           )}
 
           {/* Total */}
-          <div className="flex items-center justify-end gap-4 border-t border-[#cfe6ff] pt-2">
+          <div className="flex items-center justify-between gap-4 border-t border-[#cfe6ff] pt-2 sm:justify-end">
             <span className="text-sm font-bold text-slate-900">Total:</span>
-            <span className="text-sm font-bold text-slate-900">
+            <span className="text-right text-sm font-bold text-slate-900">
               KES {calculateTotal().toLocaleString('en-KE', { minimumFractionDigits: 2 })}
             </span>
           </div>
@@ -267,7 +267,7 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
         {/* Custom Terms */}
         <div className="border-t border-[#cfe6ff] pt-4">
           <h3 className="mb-2 text-xs text-slate-900">Add Custom Terms</h3>
-          <div className="mb-3 flex gap-2">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={customTerm}
@@ -278,7 +278,7 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
                   handleAddCustomTerm();
                 }
               }}
-              className="flex-1 rounded-sm border border-[#cfe6ff] bg-white px-3 py-2 text-xs text-slate-900 outline-none"
+              className="min-w-0 flex-1 rounded-sm border border-[#cfe6ff] bg-white px-3 py-2 text-xs text-slate-900 outline-none"
               placeholder="Enter custom term and press Add"
             />
             <button
@@ -348,10 +348,10 @@ export function QuotationForm({ onSubmit, initialData }: QuotationFormProps) {
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-stretch sm:justify-end">
         <button
           type="submit"
-          className="min-w-40 rounded-lg bg-[#c90808] px-6 py-3 font-bold text-white hover:bg-red-800"
+          className="min-w-40 flex-1 rounded-lg bg-[#c90808] px-6 py-3 font-bold text-white hover:bg-red-800 sm:flex-none"
         >
           Generate Quotation
         </button>
