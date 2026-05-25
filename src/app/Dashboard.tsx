@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FileText, LayoutDashboard, LifeBuoy, LogOut, Menu, ReceiptText, Users, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import InvoiceApp from "./InvoiceApp";
@@ -495,44 +495,38 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
   const [recordsLoading, setRecordsLoading] = useState(false);
   const [recordsError, setRecordsError] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadDashboard = async () => {
-      setDashboardLoading(true);
-      setDashboardError("");
-      try {
-        const res = await fetch(apiUrl("/api/dashboard/stats"), { headers: authHeaders() });
-        if (!res.ok) {
-          const raw = await res.text();
-          let msg = `Server error ${res.status}`;
-          try { msg = JSON.parse(raw).error || msg; } catch { msg = raw.slice(0, 300) || msg; }
-          throw new Error(msg);
-        }
-        const data = await res.json();
-        if (!cancelled) {
-          setDashboardData({
-            stats: data.stats?.length ? data.stats : defaultDashboardData.stats,
-            invoiceRecords: Array.isArray(data.invoiceRecords) ? data.invoiceRecords : [],
-            quotationRecords: Array.isArray(data.quotationRecords) ? data.quotationRecords : [],
-          });
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setDashboardError(error instanceof Error ? error.message : "Could not load dashboard stats");
-          setDashboardData(defaultDashboardData);
-        }
-      } finally {
-        if (!cancelled) setDashboardLoading(false);
+  const loadDashboard = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setDashboardLoading(true);
+    setDashboardError("");
+    try {
+      const res = await fetch(apiUrl("/api/dashboard/stats"), { headers: authHeaders() });
+      if (!res.ok) {
+        const raw = await res.text();
+        let msg = `Server error ${res.status}`;
+        try { msg = JSON.parse(raw).error || msg; } catch { msg = raw.slice(0, 300) || msg; }
+        throw new Error(msg);
       }
-    };
-
-    loadDashboard();
-
-    return () => {
-      cancelled = true;
-    };
+      const data = await res.json();
+      setDashboardData({
+        stats: data.stats?.length ? data.stats : defaultDashboardData.stats,
+        invoiceRecords: Array.isArray(data.invoiceRecords) ? data.invoiceRecords : [],
+        quotationRecords: Array.isArray(data.quotationRecords) ? data.quotationRecords : [],
+      });
+    } catch (error) {
+      setDashboardError(error instanceof Error ? error.message : "Could not load dashboard stats");
+      if (!options?.silent) setDashboardData(defaultDashboardData);
+    } finally {
+      if (!options?.silent) setDashboardLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  const handleDocumentSaved = useCallback(() => {
+    void loadDashboard({ silent: true });
+  }, [loadDashboard]);
 
   useEffect(() => {
     let cancelled = false;
@@ -897,9 +891,9 @@ export default function Dashboard({ user, onLogout }: { user: AuthUser; onLogout
 
         <main style={{ flex: 1, height: isNarrow ? "auto" : "100vh", padding: activeNav === "dashboard" ? (isNarrow ? "20px 14px 28px" : "28px 32px 40px") : 0, overflow: "auto", minWidth: 0 }}>
           {activeNav === "invoice-create" ? (
-            <InvoiceApp />
+            <InvoiceApp onSaved={handleDocumentSaved} />
           ) : activeNav === "quotation-create" ? (
-            <QuotationApp />
+            <QuotationApp onSaved={handleDocumentSaved} />
           ) : activeNav === "invoice-records" ? (
             <RecordsPage
               title="Invoice records"

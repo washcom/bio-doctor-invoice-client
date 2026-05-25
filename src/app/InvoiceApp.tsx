@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FileEdit, Mail, Printer } from "lucide-react";
 import { authHeaders } from "./auth";
-import { apiUrl } from "./api";
+import { apiErrorMessage, apiUrl } from "./api";
 
 interface LineItem {
   id: number;
@@ -61,7 +61,7 @@ function useIsMobile(bp = 960) {
   return mobile;
 }
 
-export default function InvoiceApp() {
+export default function InvoiceApp({ onSaved }: { onSaved?: () => void }) {
   const styleInjected = useRef(false);
   const previewRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -169,7 +169,6 @@ export default function InvoiceApp() {
     printWindow.document.close();
   };
   const handleGenerate = () => {
-    if (formDisabled) return;
     setShowPreview(true);
   };
   const handleEdit = () => setShowPreview(false);
@@ -225,11 +224,9 @@ export default function InvoiceApp() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const raw = await res.text();
-        let msg = `Server error ${res.status}`;
-        try { msg = JSON.parse(raw).error || msg; } catch { msg = raw.slice(0, 300) || msg; }
-        throw new Error(msg);
+        throw new Error(await apiErrorMessage(res));
       }
+      onSaved?.();
       setEmailStatus("ok");
       setTimeout(() => {
         setEmailOpen(false);
@@ -242,8 +239,6 @@ export default function InvoiceApp() {
       setEmailSending(false);
     }
   };
-
-  const formDisabled = !clientName.trim() || !clientEmail.trim() || items.every((item) => !item.desc.trim());
 
   const sharedCardStyles: React.CSSProperties = {
     background: BRAND.card,
@@ -574,13 +569,12 @@ export default function InvoiceApp() {
               <button
                 type="button"
                 onClick={handleGenerate}
-                disabled={formDisabled}
                 style={{
                   border: "none",
                   borderRadius: 8,
-                  background: formDisabled ? BRAND.border : "#c90808",
-                  color: formDisabled ? BRAND.muted : "#fff",
-                  cursor: formDisabled ? "not-allowed" : "pointer",
+                  background: "#c90808",
+                  color: "#fff",
+                  cursor: "pointer",
                   fontWeight: 700,
                   padding: "13px 22px",
                   minWidth: 160,

@@ -3,7 +3,7 @@ import { FileEdit, Mail, Printer } from "lucide-react";
 import { QuotationForm } from "./components/QuotationForm";
 import { QuotationPreview } from "./components/QuotationPreview";
 import { authHeaders } from "./auth";
-import { apiUrl } from "./api";
+import { apiErrorMessage, apiUrl } from "./api";
 import type { CSSProperties } from "react";
 import type { QuotationData } from "./components/QuotationPreview";
 
@@ -35,7 +35,7 @@ function useIsNarrow(bp = 760) {
   return narrow;
 }
 
-export default function QuotationApp() {
+export default function QuotationApp({ onSaved }: { onSaved?: () => void }) {
   const isNarrow = useIsNarrow();
   const [quotationData, setQuotationData] = useState<QuotationData | null>(null);
   const [showForm, setShowForm] = useState(true);
@@ -80,6 +80,28 @@ export default function QuotationApp() {
     printWindow.document.close();
   };
 
+  const confirmQuotationSaved = async (quotationNumber: string) => {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 900));
+      }
+
+      try {
+        const res = await fetch(apiUrl("/api/quotations"), { headers: authHeaders() });
+        if (!res.ok) continue;
+        const records = await res.json();
+        const saved = Array.isArray(records)
+          ? records.find((record) => record?.quotationNumber === quotationNumber)
+          : null;
+        if (saved?.sentAt) return true;
+      } catch {
+        // Keep the original send error unless verification can prove success.
+      }
+    }
+
+    return false;
+  };
+
   const handleSendEmail = async () => {
     if (!quotationData) return;
 
@@ -109,13 +131,19 @@ export default function QuotationApp() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const raw = await res.text();
-        let msg = `Server error ${res.status}`;
-        try { msg = JSON.parse(raw).error || msg; } catch { msg = raw.slice(0, 300) || msg; }
-        throw new Error(msg);
+        throw new Error(await apiErrorMessage(res));
       }
+      onSaved?.();
       setEmailStatus("ok");
     } catch (error) {
+      if (error instanceof TypeError && quotationData.quotationNumber) {
+        const saved = await confirmQuotationSaved(quotationData.quotationNumber);
+        if (saved) {
+          onSaved?.();
+          setEmailStatus("ok");
+          return;
+        }
+      }
       setEmailStatus("err");
       setEmailError(error instanceof Error ? error.message : "Unknown error");
     } finally {
